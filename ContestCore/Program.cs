@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Text;
 using static System.Console;
 using static System.Math;
@@ -23,6 +24,7 @@ namespace ContestCore {
     using ti3 = Tuple<int, int, int>;
     using ti2 = Tuple<int, int>;
     using tl3 = Tuple<long, long, long>;
+    using ti4 = Tuple<int,int,int,int>;
     internal class Program {
         private static void Main(string[] args) {
             var sw = new StreamWriter(OpenStandardOutput()) { AutoFlush = false };
@@ -33,9 +35,34 @@ namespace ContestCore {
 
         public class Calc {
             public void Solve() {
+                // ABC104 D
+                var S = ReadLine();
+                var N = S.Length;
+                var dp = new Map<int,long>[N+1]; // dp[i][j]=i-1文字目まで処理していてj個選んでいるときの残りの文字の処理パターン数
+                // dp[N][0~2] = 成立してないので0パターン, dp[N][3]=正常終了
+                dp[N] = new Map<int, long> {[0] = 0, [1] = 0, [2] = 0, [3] = 1};
+                var mask = "ABC_";
+
+                Func<long, long> Mod = (x) => x % (long) (1e9 + 7);
+
+                for (var i = N - 1; i >= 0; i--) {
+                    dp[i]=new Map<int, long>();
+                    foreach (var item in dp[i+1]) {
+                        var key = item.Key;
+                        
+                        var m = S[i] == '?' ? 3 : 1;
+                        var k = S[i] == '?' || S[i] == mask[key] ? 1 : 0;
+                        // すでに3つ選択しているのでやれることはない。組み合わせはS[i]が?なら3つ増える。それ以外は1つ
+                        if (key == 3) dp[i][3] = Mod(m * dp[i + 1][3]);
+                        // まだ3つ選択していないので選べる。ABCのうちkey番目の文字か?なら選べる。この文字を選ばないならパターンは上と同じ
+                        else dp[i][key] = Mod(Mod(m * dp[i + 1][key]) + Mod(k * dp[i + 1][key + 1]));
+                    }
+                }
+                
+                dp[0][0].WL();
+
 
             }
-
         }
     }
 }
@@ -286,6 +313,10 @@ namespace CS_Contest.Utils {
         public static bool IsOdd(this long @this) => @this % 2 == 1;
         public static bool IsOdd(this int @this) => @this % 2 == 1;
         public static bool IsOdd(this bint @this) => @this % 2 == 1;
+        public static bool IsMultiple(this int @this, int K) => @this % K == 0;
+        public static bool IsMultiple(this long @this, long K) => @this % K == 0;
+
+        public static long ToLong(int x) => (long) x;
 
     }
 
