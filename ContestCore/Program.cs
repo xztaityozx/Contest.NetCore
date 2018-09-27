@@ -35,148 +35,22 @@ namespace ContestCore {
 
         public class Calc {
             public void Solve() {
-                // SoundHound Inc. Programming Contest 2018 -Masters Tournament- D
-                int n = NextInt(), m = NextInt(), s = NextInt()-1, t = NextInt()-1;
-                var yg = new Dijkstra(n);
-                var sg=new Dijkstra(n);
+                int N = NextInt(), K = NextInt();
+                var b = new Ll();
+                N.REP(i => b.Add(NextLong()));
+                var dp = new long[N + 1];
+                var max = new long[N + 1];
 
-                m.REP(i => {
-                    int ui = NextInt() - 1, vi = NextInt()-1, ai = NextInt(), bi = NextInt();
-                    yg.Add(ui, vi, ai, false);
-                    sg.Add(vi, ui, bi, false);
-                });
+                for (var i = 1; i <= N; i++) {
+                    if (i - K >= 0) dp[i] = Max(dp[i - 1] + b[i - 1], max[i - K]);
+                    else dp[i] += dp[i - 1] + b[i - 1];
+
+                    max[i] = Max(max[i - 1], dp[i]);
+                }
                 
-                yg.Run(s);
-                sg.Run(t);
-
-                var ans = new Ll();
-                n.REP(k => { ans.Add(yg.Distance[k] + sg.Distance[k]); });
-
-                for (var k = n - 1; k > 0; k--) ans[k - 1] = Min(ans[k - 1], ans[k]);
-                
-                ans.Select(x=>1e15-x).WL();
-
-            }
-            
-
-        }
-        public class CostGraph {
-            public struct Edge {
-                public int To { get; set; }
-                public long Cost { get; set; }
-
-
-                public Edge(int to, long cost) {
-                    To = to;
-                    Cost = cost;
-                }
-
-            }
-
-            public int Size { get; set; }
-            public List<List<Edge>> Adjacency { get; set; }
-            public const long Inf = (long)1e15;
-
-            public CostGraph(int size) {
-                Size = size;
-                Adjacency = new List<List<Edge>>();
-                Size.REP(_ => Adjacency.Add(new List<Edge>()));
-            }
-
-            public void Add(int s, int t, long c, bool dir = true) {
-                Adjacency[s].Add(new Edge(t, c));
-                if (!dir) Adjacency[t].Add(new Edge(s, c));
-            }
-
-        }
-        public class Dijkstra : CostGraph {
-            public Dijkstra(int size) : base(size) { }
-            public int[] PreviousNodeList { get; set; }
-            public long[] Distance { get; set; }
-
-            public void Run(int s) {
-                PreviousNodeList = new int[Size];
-                Distance = new long[Size];
-                Size.REP(_ => Distance[_] = Inf);
-
-                var pq = new PriorityQueue<Edge>((x, y) => x.Cost.CompareTo(y.Cost));
-                Distance[s] = 0;
-                pq.Enqueue(new Edge(s, 0));
-                while (pq.Any()) {
-                    var src = pq.Dequeue();
-                    if (Distance[src.To] < src.Cost) continue;
-                    for (var i = 0; i < Adjacency[src.To].Count; i++) {
-                        var tmp = Adjacency[src.To][i];
-                        var cost = tmp.Cost + src.Cost;
-                        if (cost >= Distance[tmp.To]) continue;
-                        Distance[tmp.To] = cost;
-                        pq.Enqueue(new Edge(tmp.To, cost));
-                        PreviousNodeList[tmp.To] = src.To;
-                    }
-                }
+                dp[N].WL();
             }
         }
-        public class PriorityQueue<T> {
-            private readonly List<T> heap;
-            private readonly Comparison<T> compare;
-            private int size;
-
-            public PriorityQueue() : this(Comparer<T>.Default) {
-            }
-
-            public PriorityQueue(IComparer<T> comparer) : this(16, comparer.Compare) {
-            }
-
-            public PriorityQueue(Comparison<T> comparison) : this(16, comparison) {
-            }
-
-            public PriorityQueue(int capacity, Comparison<T> comparison) {
-                this.heap = new List<T>(capacity);
-                this.compare = comparison;
-            }
-
-            public void Enqueue(T item) {
-                this.heap.Add(item);
-                var i = size++;
-                while (i > 0) {
-                    var p = (i - 1) >> 1;
-                    if (compare(this.heap[p], item) <= 0)
-                        break;
-                    this.heap[i] = heap[p];
-                    i = p;
-                }
-                this.heap[i] = item;
-            }
-
-            public T Dequeue() {
-                var ret = this.heap[0];
-                var x = this.heap[--size];
-                var i = 0;
-                while ((i << 1) + 1 < size) {
-                    var a = (i << 1) + 1;
-                    var b = (i << 1) + 2;
-                    if (b < size && compare(heap[b], heap[a]) < 0) a = b;
-                    if (compare(heap[a], x) >= 0)
-                        break;
-                    heap[i] = heap[a];
-                    i = a;
-                }
-                heap[i] = x;
-                heap.RemoveAt(size);
-                return ret;
-            }
-
-            public T Peek() {
-                return heap[0];
-            }
-
-            public int Count => size;
-
-            public bool Any() {
-                return size > 0;
-            }
-        }
-
     }
 }
 namespace Nakov.IO {

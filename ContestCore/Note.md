@@ -80,3 +80,36 @@ public void Solve() {
 
 }
 ```                                                                                                       
+
+# SoundHound Inc. Programming Contest 2018 Masters Tournament 本戦(Open) B Neutralize
+- 数列の`K`個の連続した区間を0にできるとき、数列の総和の最大値はいくつか
+    - [B - Neutralize SoundHound Programming Contest 2018 - バイトの競プロメモ](http://baitop.hatenadiary.jp/entry/2018/07/29/204143)    
+- `dp[i]=i番目までの最大値`
+    - `i-K>=0` のとき
+        - 候補は`これまでの最大値+数列の次の値`もしくは`K個前までの最大値`
+        - 前者は0にする操作をしない
+        - 後者は`i-K`から`i`までを0で埋める場合
+        - `K`個前までの最大値は`Max(一つ前の最大値,dp[i])` で計算できる。
+    - `i<K`のとき
+        - `i`を終点に0埋めすることができない。ので普通に加算するしかない
+        
+- `O(N)`
+```c#
+public void Solve() {
+    int N = NextInt(), K = NextInt();
+    var b = new Ll();
+    N.REP(i => b.Add(NextLong()));
+    var dp = new long[N + 1];
+    var max = new long[N + 1];
+
+    for (var i = 1; i <= N; i++) {
+        if (i - K >= 0) dp[i] = Max(dp[i - 1] + b[i - 1], max[i - K]);
+        else dp[i] += dp[i - 1] + b[i - 1];
+
+        max[i] = Max(max[i - 1], dp[i]);
+    }
+    
+    dp[N].WL();
+}
+```
+
