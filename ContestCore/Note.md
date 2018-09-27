@@ -43,3 +43,40 @@ public void Solve() {
 
 }
 ```
+
+# SoundHound Inc. Programming Contest 2018 Masters Tournament D Saving Snuuk
+- `N`個の都市間を`M`本の電車が結んでいる。この電車を何本か使って都市`s`から`t`へ行きたい。都市`ui`から`vi`へ行くには`ai`円かかり、`bi`スヌークかかる
+- `s`から`t`へ旅する道中のどこかの駅で円を全額スヌークに変えておきたい。どこでも両替できるが`i`番目の駅の両替所は`i`年後に閉鎖する。
+- `i`年後に出発し、`t`についたときの最大のスヌークを全部答えろ
+- 単純に`s`から`t`への最短距離を選びたい。しかしある年以降はそのルートを辿ってもスヌークを最大化できなくなるかもしれない
+- ここで`s`->`i`->`t` という道順を考える
+    - `i`は両替を行う駅で、このルートのコストは __`s`から`i`へ向かうのかかる`円` + `i`から`t`へ向かうのにかかる`スヌーク`__ となる
+    - これをすべての`i`について計算する。`i`番目のルートは`i`年後には使えなくなるのでそれ以降のルートのうち __最小コスト__ のものを選ぶ
+- 肝心のルートのコストは`s` -> `i` にかかる円のグラフと `t` -> `i` にかかるスヌークのグラフを用意し、ダイクストラ法をする
+    - `t` -> `i` と `i` -> `t` は同コスト
+- `O(M+N)log(N))`
+```c#
+public void Solve() {
+    // SoundHound Inc. Programming Contest 2018 -Masters Tournament- D
+    int n = NextInt(), m = NextInt(), s = NextInt()-1, t = NextInt()-1;
+    var yg = new Dijkstra(n);
+    var sg=new Dijkstra(n);
+
+    m.REP(i => {
+        int ui = NextInt() - 1, vi = NextInt()-1, ai = NextInt(), bi = NextInt();
+        yg.Add(ui, vi, ai, false);
+        sg.Add(vi, ui, bi, false);
+    });
+    
+    yg.Run(s);
+    sg.Run(t);
+
+    var ans = new Ll();
+    n.REP(k => { ans.Add(yg.Distance[k] + sg.Distance[k]); });
+
+    for (var k = n - 1; k > 0; k--) ans[k - 1] = Min(ans[k - 1], ans[k]);
+    
+    ans.Select(x=>1e15-x).WL();
+
+}
+```                                                                                                       
