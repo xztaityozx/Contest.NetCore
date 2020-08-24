@@ -4,16 +4,12 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Numerics;
-using System.Runtime.CompilerServices;
-using System.Text;
 using static System.Console;
 using static System.Math;
-
 using CS_Contest.Loop;
 using CS_Contest.Utils;
 using static Nakov.IO.Cin;
 using static CS_Contest.IO.IO;
-using static CS_Contest.Utils.MyMath;
 
 
 namespace ContestCore {
@@ -24,42 +20,39 @@ namespace ContestCore {
     using ti3 = Tuple<int, int, int>;
     using ti2 = Tuple<int, int>;
     using tl3 = Tuple<long, long, long>;
-    using ti4 = Tuple<int,int,int,int>;
+    using ti4 = Tuple<int, int, int, int>;
+
     internal class Program {
         private static void Main(string[] args) {
-            var sw = new StreamWriter(OpenStandardOutput()) { AutoFlush = false };
+            var sw = new StreamWriter(OpenStandardOutput()) {AutoFlush = false};
             SetOut(sw);
-            new Calc().Solve();
+            Calc.Solve();
             Out.Flush();
         }
 
         public class Calc {
-            public void Solve() {
-                int N = NextInt(), K = NextInt();
-                var b = new Ll();
-                N.REP(i => b.Add(NextLong()));
-                var dp = new long[N + 1];
-                var max = new long[N + 1];
+            public static void Solve() {
+                var n = NextInt();
+                var a = NextIntList();
+                var max = 1000;
 
-                for (var i = 1; i <= N; i++) {
-                    if (i - K >= 0) dp[i] = Max(dp[i - 1] + b[i - 1], max[i - K]);
-                    else dp[i] += dp[i - 1] + b[i - 1];
-
-                    max[i] = Max(max[i - 1], dp[i]);
+                for (var i = 0; i < n - 1; i++) {
+                    if (a[i] < a[i + 1]) max += (a[i + 1] - a[i]) * (max / a[i]);
                 }
-                
-                dp[N].WL();
+
+                max.WL();
             }
         }
     }
 }
+
 namespace Nakov.IO {
     using System;
     using System.Text;
     using System.Globalization;
 
     public static class Cin {
-        public static string NextToken() {
+        private static string NextToken() {
             var tokenChars = new StringBuilder();
             var tokenFinished = false;
             var skipWhiteSpaceMode = true;
@@ -69,11 +62,11 @@ namespace Nakov.IO {
                     tokenFinished = true;
                 }
                 else {
-                    var ch = (char)nextChar;
+                    var ch = (char) nextChar;
                     if (char.IsWhiteSpace(ch)) {
                         if (skipWhiteSpaceMode) continue;
                         tokenFinished = true;
-                        if (ch == '\r' && (Environment.NewLine == "\r\n")) {
+                        if (ch == '\r' && Environment.NewLine == "\r\n") {
                             Read();
                         }
                     }
@@ -92,10 +85,12 @@ namespace Nakov.IO {
             var token = NextToken();
             return int.Parse(token);
         }
+
         public static long NextLong() {
             var token = NextToken();
             return long.Parse(token);
         }
+
         public static double NextDouble(bool acceptAnyDecimalSeparator = true) {
             var token = NextToken();
             if (acceptAnyDecimalSeparator) {
@@ -108,6 +103,7 @@ namespace Nakov.IO {
                 return result;
             }
         }
+
         public static decimal NextDecimal(bool acceptAnyDecimalSeparator = true) {
             var token = NextToken();
             if (acceptAnyDecimalSeparator) {
@@ -127,7 +123,6 @@ namespace Nakov.IO {
             token = token.Replace(',', '.');
             return BigInteger.Parse(token, CultureInfo.InvariantCulture);
         }
-
     }
 }
 
@@ -153,18 +148,19 @@ namespace CS_Contest.Loop {
                 act(item);
             }
         }
-
     }
 
     public class Generate {
         public static IEnumerable<int> Seq(int e) => Seq(0, e, 1);
         public static IEnumerable<int> Seq(int s, int e) => Seq(s, e, 1);
+
         public static IEnumerable<int> Seq(int s, int e, int a) {
             while (s != e) {
                 yield return s;
                 s += a;
             }
         }
+
         public static List<T> Repeat<T>(Func<int, T> result, int range) =>
             Enumerable.Range(0, range).Select(result).ToList();
     }
@@ -180,7 +176,10 @@ namespace CS_Contest.IO {
         public static void WL<T>(this IEnumerable<T> list) => list.ToList().ForEach(x => x.WL());
 
         public static Li NextIntList() => ReadLine().Split().Select(int.Parse).ToList();
-        public static Li NextIntList(int n) => Enumerable.Repeat(0, n).Select(x => ReadLine()).Select(int.Parse).ToList();
+
+        public static Li NextIntList(int n) =>
+            Enumerable.Repeat(0, n).Select(x => ReadLine()).Select(int.Parse).ToList();
+
         public static Ll NextLongList() => ReadLine().Split().Select(long.Parse).ToList();
 
         public static T Tee<T>(this T t, Func<T, string> formatter = null) {
@@ -188,6 +187,7 @@ namespace CS_Contest.IO {
             formatter(t).WL();
             return t;
         }
+
         public static void JoinWL<T>(this IEnumerable<T> @this, string sp = " ") => @this.StringJoin(sp).WL();
         public static void W(this object @this) => Write(@this);
 
@@ -201,10 +201,7 @@ namespace CS_Contest.IO {
 
             return rt;
         }
-
     }
-
-
 }
 
 namespace CS_Contest.Utils {
@@ -304,14 +301,15 @@ namespace CS_Contest.Utils {
         public static bool IsMultiple(this long @this, long K) => @this % K == 0;
 
         public static long ToLong(int x) => (long) x;
-
     }
 
 
-
     public class Map<TKey, TValue> : Dictionary<TKey, TValue> {
-        public Map() : base() { }
-        public Map(int capacity) : base(capacity) { }
+        public Map() : base() {
+        }
+
+        public Map(int capacity) : base(capacity) {
+        }
 
         public new TValue this[TKey index] {
             get {
@@ -323,11 +321,7 @@ namespace CS_Contest.Utils {
     }
 
     public static class MyMath {
-
         public static T EMin<T>(params T[] a) where T : IComparable<T> => a.Min();
         public static T EMax<T>(params T[] a) where T : IComparable<T> => a.Max();
-
     }
-
-
 }
