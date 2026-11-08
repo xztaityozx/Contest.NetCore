@@ -24,4 +24,20 @@ public static class IO
         var tokens = Tokens();
         return (T1.Parse(tokens[0], null), T2.Parse(tokens[1], null), T3.Parse(tokens[2], null), T4.Parse(tokens[3], null));
     }
+    public static IEnumerable<T> NextEnumerable<T>() where T : IParsable<T> => Tokens().Select(token => T.Parse(token, null));
 }
+
+public class Map<TKey, TValue>(TValue defaultValue = default!) : Dictionary<TKey, TValue> where TKey : notnull
+{
+    public Func<TValue>? DefaultFacory { get; init; } = null;
+    public new TValue this[TKey key]
+    {
+        get
+        {
+            if (!TryGetValue(key, out var v)) base[key] = v = DefaultFacory is null ? defaultValue : DefaultFacory();
+            return v;
+        }
+        set => base[key] = value;
+    }
+}
+
